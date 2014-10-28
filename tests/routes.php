@@ -3,13 +3,19 @@
 use packages\Tres\router\Route;
 use packages\Tres\router\PackageInfo;
 
-require_once('../packages/Tres/router/Route.php');
-require_once('../packages/Tres/router/PackageInfo.php');
-
 
 Route::get('/', function(){
     echo '<h1>ROOT! :D</h1>';
     echo 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis, quisquam.';
+});
+
+Route::match(['GET', 'POST'], 'multi-request', function(){
+    echo (isset($_POST) && !empty($_POST)) ? 'POST' : 'GET', '<br />';
+    ?>
+    <form method="POST">
+        <input type="submit" name="submit" />
+    </form>
+    <?php
 });
 
 Route::get('/form/get/', function(){
@@ -29,5 +35,10 @@ Route::get('/about', function(){
     echo '<h1>About?</h1>';
     echo '<pre>', print_r(PackageInfo::get()), '</pre>';
 });
+
+/*Route::error('/error-404', 404, function(){
+    echo '<h1>Error 404 ;(</h1>';
+    echo '<p>Page not found.</p>';
+});*/
 
 Route::dispatch();

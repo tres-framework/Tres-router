@@ -61,9 +61,13 @@ namespace packages\Tres\router {
                 throw new RouteException('Route path must be a string.');
             }
             
-            self::$_routes[] = $route;
-            self::$_requests[] = $request;
-            self::$_actions[] = $action;
+            $requests = is_array($request) ? $request : [$request];
+            
+            foreach($requests as $request){
+                self::$_routes[] = $route;
+                self::$_requests[] = $request;
+                self::$_actions[] = $action;
+            }
         }
         
         /**
