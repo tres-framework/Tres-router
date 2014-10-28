@@ -4,6 +4,7 @@ namespace packages\Tres\router {
     
     use Exception;
     
+    class HTTPRouteException extends Exception {}
     class RouteException extends Exception {}
     
     class Route {
@@ -23,6 +24,16 @@ namespace packages\Tres\router {
         protected static $_requests = [];
         
         /**
+         * The accepted HTTP requests.
+         * 
+         * @var array
+         */
+        protected static $_acceptedRequests = [
+            'GET',
+            'POST'
+        ];
+        
+        /**
          * The route actions.
          * 
          * @var array
@@ -30,23 +41,23 @@ namespace packages\Tres\router {
         protected static $_actions = [];
         
         /**
-         * Registers a GET route.
+         * Registers a route with a GET request.
          * 
          * @param string         $route  The route path.
          * @param callable|array $action The action.
          */
         public static function get($route, $action){
-            self::match('GET', $route, $action);
+            self::register('GET', $route, $action);
         }
         
         /**
-         * Registers a POST route.
+         * Registers a route with a POST request.
          * 
          * @param string         $route  The route path.
          * @param callable|array $action The action.
          */
         public static function post($route, $action){
-            self::match('POST', $route, $action);
+            self::register('POST', $route, $action);
         }
         
         /**
@@ -56,7 +67,7 @@ namespace packages\Tres\router {
          * @param  string         $route   The route path.
          * @param  callable|array $action  The route action.
          */
-        public static function match($request, $route, $action){
+        public static function register($request, $route, $action){
             if(!is_string($route)){
                 throw new RouteException('Route path must be a string.');
             }
@@ -64,6 +75,10 @@ namespace packages\Tres\router {
             $requests = is_array($request) ? $request : [$request];
             
             foreach($requests as $request){
+                if(!in_array($request, self::$_acceptedRequests)){
+                    throw new HTTPRouteException('The '.$request.' HTTP request is not supported.');
+                }
+                
                 self::$_routes[] = $route;
                 self::$_requests[] = $request;
                 self::$_actions[] = $action;

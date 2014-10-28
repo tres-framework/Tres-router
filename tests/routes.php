@@ -9,7 +9,7 @@ Route::get('/', function(){
     echo 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis, quisquam.';
 });
 
-Route::match(['GET', 'POST'], 'multi-request', function(){
+Route::register(['GET', 'POST'], 'multi-request', function(){
     echo (isset($_POST) && !empty($_POST)) ? 'POST' : 'GET', '<br />';
     ?>
     <form method="POST">
@@ -21,14 +21,13 @@ Route::match(['GET', 'POST'], 'multi-request', function(){
 Route::get('/form/get/', function(){
     echo '<h1>GET</h1>';
     echo 'You are now GETting.<br />';
-    echo '<pre>', print_r($_GET), '</pre>';
     
     include('form.php');
 });
-Route::post('/form/get/post', function(){
+Route::post('/form/get/post/', function(){
     echo '<h1>POST</h1>';
-    echo 'Posted.<br />';
-    echo '<pre>', print_r($_POST), '</pre>';
+    echo 'Posted:';
+    //echo '<pre>', print_r($_POST), '</pre>';
 });
 
 Route::get('/about', function(){
