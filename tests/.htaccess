@@ -1,0 +1,63 @@
+#-------------------------------------------------------------------------------
+# MultiViews
+#-------------------------------------------------------------------------------
+# 
+# With MultiViews enabled, if a browser requests index.html, and there is no 
+# file named as such, the web server will look for index.html.en, index.html.fr 
+# and so on, depending on the user's language preferences.
+# 
+Options -MultiViews
+
+
+#-------------------------------------------------------------------------------
+# Indexes
+#-------------------------------------------------------------------------------
+# 
+# With Indexes enabled, if there is no default file in a directory like 
+# index.html, a directory index will be automatically generated.
+#
+Options -Indexes
+
+
+RewriteEngine On
+RewriteBase /
+
+
+#-------------------------------------------------------------------------------
+# The www subdomain
+#-------------------------------------------------------------------------------
+#
+# For SEO reasons, it's recommended to either force the www subdomain, or leave 
+# it out. Leaving it out is generally preferred, because of the URL length.
+#
+RewriteCond %{HTTP_HOST} ^www\.(.+)
+RewriteCond %{HTTPS}s/%1 ^(on(s)|offs)/(.+)
+    RewriteRule ^ http%2://%3%{REQUEST_URI} [R=302,L]
+
+
+#-------------------------------------------------------------------------------
+# Trailing slash at the end of the URL
+#-------------------------------------------------------------------------------
+# 
+# To prevent duplicate content (SEO) and improve performance, it's good practice
+# to automatically add trailing slashes.
+# 
+# Checks if the path does not lead to a file or ends with an extension, and 
+# checks if it doesn't already contain a trailing slash.
+# 
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !(\.[a-zA-Z0-9]{1,5}|/)$
+    RewriteRule ^(.+)$ $1/ [R=302,L]
+
+
+#-------------------------------------------------------------------------------
+# Routing
+#-------------------------------------------------------------------------------
+#
+# The Tres routing system expects all routes to go through the index file. The 
+# route path will be checked with a GET request.
+#
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-l
+    RewriteRule ^(.+)$ index.php?/$1 [QSA,L]
