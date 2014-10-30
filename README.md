@@ -1,8 +1,8 @@
 Tres router
 ===========
 
-This is the configuration package used for the [Tres Framework](https://github.com/tres-framework/Tres). 
-It can be used without the framework core.
+This is the router package used for [Tres Framework](https://github.com/tres-framework/Tres). 
+It can be used without the framework.
 
 ## Requirements
 - PHP 5.4 or greater.
