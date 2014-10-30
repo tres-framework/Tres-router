@@ -3,6 +3,7 @@
 namespace packages\Tres\router {
     
     use Exception;
+    use packages\Tres\router\Config;
     
     class HTTPRouteException extends Exception {}
     class RouteException extends Exception {}
@@ -10,11 +11,11 @@ namespace packages\Tres\router {
     class Route {
         
         /**
-         * The project root.
+         * The router configuration.
          * 
          * @var string
          */
-        protected static $_root = '';
+        protected static $_config = [];
         
         /**
          * The route paths.
@@ -47,34 +48,8 @@ namespace packages\Tres\router {
          */
         protected static $_actions = [];
         
-        /**
-         * The namespace of the controllers.
-         * 
-         * @var string
-         */
-        protected static $_controllerNamespace = '';
-        
-        /**
-         * The controller extension.
-         */
-        const CONTROLLER_EXT = '.php';
-        
-        /**
-         * The project root.
-         * 
-         * @param string $path
-         */
-        public static function setRoot($path){
-            self::$_root = $path;
-        }
-        
-        /**
-         * The namespace for the controllers.
-         * 
-         * @param string $ns
-         */
-        public static function setControllerNamespace($ns = 'controllers'){
-            self::$_controllerNamespace = $ns;
+        public static function setConfig(Config $config){
+            self::$_config = $config->get();
         }
         
         /**
@@ -128,7 +103,12 @@ namespace packages\Tres\router {
          * @return string
          */
         protected static function _getURI(){
-            return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $root = str_replace('\\', '/', self::$_config['root']);
+            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $uri = $_SERVER['DOCUMENT_ROOT'].$uri;
+            $uri = str_replace($root, '', $uri);
+            
+            return $uri;
         }
         
         /**
@@ -137,11 +117,16 @@ namespace packages\Tres\router {
          * @return bool True on success.
          */
         public static function dispatch(){
-            $uri = trim(self::_getURI(), '/');
-            $routes = array_map('trim', self::$_routes, array_fill(0, count(self::$_routes), '/'));
+            $uri = self::_getURI();
             $request = $_SERVER['REQUEST_METHOD'];
-            
+            $routes = [];
             $routeMatched = false;
+            
+            foreach(self::$_routes as $route){
+                $route = '/'.ltrim($route, '/');
+                $route = rtrim($route, '/').'/';
+                $routes[] = $route;
+            }
             
             if(in_array($uri, $routes)){
                 $matchedRoutes = array_keys($routes, $uri);
@@ -157,11 +142,11 @@ namespace packages\Tres\router {
                             
                             if(isset($controller, $method)){
                                 $controllerName = $controller;
-                                $controller = self::$_controllerNamespace.'\\'.$controllerName;
+                                $controller = self::$_config['controllers']['namespace'].'\\'.$controllerName;
                                 
-                                $controllerFile  = self::$_root.'/';
+                                $controllerFile  = self::$_config['controllers']['dir'].'/';
                                 $controllerFile .= str_replace('\\', '/', $controller);
-                                $controllerFile .= self::CONTROLLER_EXT;
+                                $controllerFile .= '.php';
                                 
                                 if(!is_readable($controllerFile)){
                                     throw new RouteException('Controller "'.$controllerName.'" is not found.');

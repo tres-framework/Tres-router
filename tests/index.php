@@ -1,6 +1,8 @@
 <?php
 
 use packages\Tres\router\RouteException;
+use packages\Tres\router\ConfigException;
+use packages\Tres\router\Config as RouteConfig;
 
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -20,6 +22,20 @@ spl_autoload_register(function($class){
 });
 
 class_alias('packages\Tres\router\Route', 'Route');
+
+try {
+    Route::setConfig(
+        new RouteConfig([
+            'root' => __DIR__,
+            'controllers' => [
+                'namespace' => 'tests\\controllers\\Tres_tests',
+                'dir' => dirname(__DIR__)
+            ]
+        ])
+    );
+} catch(ConfigException $e){
+    echo $e->getMessage();
+}
 
 try {
     require_once('routes.php');

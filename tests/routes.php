@@ -1,8 +1,5 @@
 <?php
 
-Route::setRoot(dirname(__DIR__));
-Route::setControllerNamespace('tests\\controllers\\Tres_tests');
-
 Route::get('/', [
     'controller' => 'HomeController',
     'method' => 'exampleMethod'
