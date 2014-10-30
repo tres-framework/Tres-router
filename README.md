@@ -20,9 +20,6 @@ but also that it's prettier for humans like you and me.
 ```php
 <?php
 
-Route::setRoot(__DIR__);
-Route::setControllerNamespace('controllers');
-
 Route::get('/', function(){
     include('views/homepage.php');
 });
