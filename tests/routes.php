@@ -1,13 +1,22 @@
 <?php
 
-use packages\Tres\router\Route;
-use packages\Tres\router\PackageInfo;
+Route::setRoot(dirname(__DIR__));
+Route::setControllerNamespace('tests\\controllers\\Tres_tests');
 
+Route::get('/', [
+    'controller' => 'HomeController',
+    'method' => 'exampleMethod'
+]);
 
-Route::get('/', function(){
-    echo '<h1>ROOT! :D</h1>';
-    echo 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis, quisquam.';
-});
+Route::get('/paramtest', [
+    'controller' => 'HomeController',
+    'method' => 'exampleMethod2',
+    'args' => [
+        'first' => 1,
+        'second' => '2',
+        'third' => 'three'
+    ]
+]);
 
 Route::register(['GET', 'POST'], 'multi-request', function(){
     echo (isset($_POST) && !empty($_POST)) ? 'POST' : 'GET', '<br />';
@@ -24,20 +33,16 @@ Route::get('/form/get/', function(){
     
     include('form.php');
 });
+
 Route::post('/form/get/post/', function(){
     echo '<h1>POST</h1>';
     echo 'Posted:';
-    //echo '<pre>', print_r($_POST), '</pre>';
+    echo '<pre>', print_r($_POST), '</pre>';
 });
 
 Route::get('/about', function(){
-    echo '<h1>About?</h1>';
-    echo '<pre>', print_r(PackageInfo::get()), '</pre>';
+    echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
+    echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
 });
-
-/*Route::error('/error-404', 404, function(){
-    echo '<h1>Error 404 ;(</h1>';
-    echo '<p>Page not found.</p>';
-});*/
 
 Route::dispatch();

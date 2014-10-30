@@ -10,6 +10,13 @@ namespace packages\Tres\router {
     class Route {
         
         /**
+         * The project root.
+         * 
+         * @var string
+         */
+        protected static $_root = '';
+        
+        /**
          * The route paths.
          * 
          * @var array
@@ -39,6 +46,36 @@ namespace packages\Tres\router {
          * @var array
          */
         protected static $_actions = [];
+        
+        /**
+         * The namespace of the controllers.
+         * 
+         * @var string
+         */
+        protected static $_controllerNamespace = '';
+        
+        /**
+         * The controller extension.
+         */
+        const CONTROLLER_EXT = '.php';
+        
+        /**
+         * The project root.
+         * 
+         * @param string $path
+         */
+        public static function setRoot($path){
+            self::$_root = $path;
+        }
+        
+        /**
+         * The namespace for the controllers.
+         * 
+         * @param string $ns
+         */
+        public static function setControllerNamespace($ns = 'controllers'){
+            self::$_controllerNamespace = $ns;
+        }
         
         /**
          * Registers a route with a GET request.
@@ -96,6 +133,8 @@ namespace packages\Tres\router {
         
         /**
          * Processes the routes.
+         * 
+         * @return bool True on success.
          */
         public static function dispatch(){
             $uri = trim(self::_getURI(), '/');
@@ -112,15 +151,47 @@ namespace packages\Tres\router {
                         $routeMatched = true;
                         
                         if(is_array(self::$_actions[$route])){
-                            // array
+                            $args = [];
+                            
+                            extract(self::$_actions[$route]);
+                            
+                            if(isset($controller, $method)){
+                                $controllerName = $controller;
+                                $controller = self::$_controllerNamespace.'\\'.$controllerName;
+                                
+                                $controllerFile  = self::$_root.'/';
+                                $controllerFile .= str_replace('\\', '/', $controller);
+                                $controllerFile .= self::CONTROLLER_EXT;
+                                
+                                if(!is_readable($controllerFile)){
+                                    throw new RouteException('Controller "'.$controllerName.'" is not found.');
+                                }
+                                
+                                if(!method_exists($controller, $method)){
+                                    throw new RouteException(
+                                        'Method "'.$method.'" does not exist in the "'.$controllerName.'" controller.'
+                                    );
+                                }
+                                
+                                call_user_func_array([
+                                    new $controller(),
+                                    $method
+                                ], $args);
+                                
+                                return true;
+                            } else {
+                                throw new RouteException('Routes require at least a controller and a method.');
+                            }
                         } else if(is_callable(self::$_actions[$route])){
-                            call_user_func(self::$_actions[$route]);
+                            return call_user_func(self::$_actions[$route]);
                         } else {
                             throw new RouteException('Second argument is not an array, nor a callback.');
                         }
                     }
                 }
             }
+            
+            throw new RouteException('Something went wrong.');
         }
         
     }
