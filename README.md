@@ -2,7 +2,15 @@ Tres router
 ===========
 
 This is the router package used for [Tres Framework](https://github.com/tres-framework/Tres). 
-It can be used without the framework.
+This is a stand-alone package, which means that it can be used without the framework.
+
+## Intro
+A router generally forwards you to something. In this case, we take the URI, match it with a 
+list and do something based on that. What you want to do with the URI's is up to you.
+
+This technique adds a degree of separation between the files used to generate a webpage and the 
+URL that is presented to the world. An addition to that is not only that it is search engine friendly,
+but also that it's prettier for humans.
 
 ## Requirements
 - PHP 5.4 or greater.
@@ -41,4 +49,4 @@ Route::register(['GET', 'POST'], 'contact', function(){
 Route::dispatch();
 ```
 
-*Inspired by [Macaw router](https://github.com/NoahBuscher/Macaw/blob/master/Macaw.php).*
+*This package is inspired by [Macaw router](https://github.com/NoahBuscher/Macaw).*
