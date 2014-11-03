@@ -32,6 +32,13 @@ namespace packages\Tres\router {
         protected static $_requests = [];
         
         /**
+         * The HTTP request.
+         * 
+         * @var array
+         */
+        protected static $_request = '';
+        
+        /**
          * The accepted HTTP requests.
          * 
          * @var array
@@ -118,7 +125,7 @@ namespace packages\Tres\router {
          */
         public static function dispatch(){
             $uri = self::_getURI();
-            $request = $_SERVER['REQUEST_METHOD'];
+            self::$_request = $_SERVER['REQUEST_METHOD'];
             $routes = [];
             $routeMatched = false;
             
@@ -128,55 +135,133 @@ namespace packages\Tres\router {
                 $routes[] = $route;
             }
             
+            // Static URL
             if(in_array($uri, $routes)){
                 $matchedRoutes = array_keys($routes, $uri);
                 
                 foreach($matchedRoutes as $route){
-                    if(self::$_requests[$route] === $request){
-                        $routeMatched = true;
-                        
-                        if(is_array(self::$_actions[$route])){
-                            $args = [];
-                            
-                            extract(self::$_actions[$route]);
-                            
-                            if(isset($controller, $method)){
-                                $controllerName = $controller;
-                                $controller = self::$_config['controllers']['namespace'].'\\'.$controllerName;
-                                
-                                $controllerFile  = self::$_config['controllers']['dir'].'/';
-                                $controllerFile .= str_replace('\\', '/', $controller);
-                                $controllerFile .= '.php';
-                                
-                                if(!is_readable($controllerFile)){
-                                    throw new RouteException('Controller "'.$controllerName.'" is not found.');
-                                }
-                                
-                                if(!method_exists($controller, $method)){
-                                    throw new RouteException(
-                                        'Method "'.$method.'" does not exist in the "'.$controllerName.'" controller.'
-                                    );
-                                }
-                                
-                                call_user_func_array([
-                                    new $controller(),
-                                    $method
-                                ], $args);
-                                
-                                return true;
-                            } else {
-                                throw new RouteException('Routes require at least a controller and a method.');
-                            }
-                        } else if(is_callable(self::$_actions[$route])){
-                            return call_user_func(self::$_actions[$route]);
-                        } else {
-                            throw new RouteException('Second argument is not an array, nor a callback.');
-                        }
+                    $routeMatched = self::_run($route);
+                }
+                
+                if($routeMatched){
+                    return true;
+                }
+            } else {
+                // Dynamic URL
+                
+                $splitURI = explode('/', trim($uri, '/'));
+                
+                foreach(self::$_routes as $routeKey => $route){
+                    // Continues to next loop if the placeholder identifier is not found.
+                    if(strpos($route, ':') === false){
+                        continue;
+                    }
+                    
+                    $splitRoute = explode('/', trim($route, '/'));
+                    
+                    if($args = self::_getArgs($splitRoute, $splitURI)){
+                        $routeMatched = self::_run($routeKey, $args);
+                    }
+                    
+                    if($routeMatched){
+                        return true;
                     }
                 }
             }
             
+            // TODO: Change to error 404.
             throw new RouteException('Something went wrong.');
+        }
+        
+        /**
+         * Finds the correct HTTP request and runs the route.
+         * 
+         * @param  int   $routeKey The key of the route.
+         * @param  array $args     (Optional) The arguments to pass to the route.
+         * @return mixed
+         */
+        public static function _run($routeKey, $args = []){
+            if(self::$_requests[$routeKey] === self::$_request){
+                if(is_array(self::$_actions[$routeKey])){
+                    extract(self::$_actions[$routeKey]);
+                    
+                    if(isset($controller, $method)){
+                        $controllerName = $controller;
+                        $controller = self::$_config['controllers']['namespace'].'\\'.$controllerName;
+                        
+                        $controllerFile  = self::$_config['controllers']['dir'].'/';
+                        $controllerFile .= str_replace('\\', '/', $controller);
+                        $controllerFile .= '.php';
+                        
+                        if(!is_readable($controllerFile)){
+                            throw new RouteException('Controller "'.$controllerName.'" is not found.');
+                        }
+                        
+                        if(!method_exists($controller, $method)){
+                            throw new RouteException(
+                                'Method "'.$method.'" does not exist in the "'.$controllerName.'" controller.'
+                            );
+                        }
+                        
+                        call_user_func_array([
+                            new $controller(),
+                            $method
+                        ], $args);
+                        
+                        return true;
+                    } else {
+                        throw new RouteException('Routes require at least a controller and a method.');
+                    }
+                } else if(is_callable(self::$_actions[$routeKey])){
+                    call_user_func_array(self::$_actions[$routeKey], $args);
+                    
+                    return true;
+                } else {
+                    throw new RouteException('Second argument is not an array, nor a callback.');
+                }
+            }
+        }
+        
+        /**
+         * Checks the URI and gets the arguments.
+         * 
+         * @param  array      $splitRoute The route array to check from.
+         * @param  array      $splitURI   The path array to check from.
+         * @return array|bool             Returns the parameters on success.
+         *                                Returns false on failure.
+         */
+        protected static function _getArgs(array $splitRoute, array $splitURI){
+            // Checks if all parameters are set and checks if the first part
+            // of path matches recursively.
+            if(count($splitURI) == count($splitRoute)){
+                if(current($splitRoute) === current($splitURI)){
+                    unset($splitRoute[array_keys($splitRoute)[0]]);
+                    unset($splitURI[array_keys($splitURI)[0]]);
+                    reset($splitRoute);
+                    reset($splitURI);
+                    
+                    return self::_getArgs($splitRoute, $splitURI);
+                } else {
+                    $firstSplitRoute = reset($splitRoute);
+                    
+                    // Checks if it really starts with the placeholder identifier.
+                    if(isset($firstSplitRoute[0]) && $firstSplitRoute[0] === ':'){
+                        // Creates key value pairs
+                        // ":placeholder" and "value" become ['placeholder' => 'value']
+                        $values = [];
+                        
+                        foreach($splitRoute as $k => $singleSplitRoute){
+                            if(isset($splitURI[$k])){
+                                $values[str_replace(':', '', $singleSplitRoute)] = $splitURI[$k];
+                            }
+                        }
+                        
+                        return $values;
+                    }
+                }
+            }
+            
+            return false;
         }
         
     }
