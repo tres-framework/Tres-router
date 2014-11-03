@@ -6,7 +6,7 @@ namespace packages\Tres\router {
         
         public static function get(){
             return [
-                'version' => '0.1',
+                'version' => '0.2',
                 'authors' => [
                     'pedzed' => [
                         'profile' => 'https://github.com/pedzed/'
