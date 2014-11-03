@@ -20,16 +20,28 @@ but also that it's prettier for humans like you and me.
 ```php
 <?php
 
-Route::setRoot(__DIR__);
-Route::setControllerNamespace('controllers');
+Route::setConfig(
+    new RouteConfig([
+        // Route's basepath.
+        'root' => __DIR__,
+        
+        'controllers' => [
+            // The namespace for all controllers.
+            'namespace' => 'controllers',
+            
+            // The directory the controllers are stored in.
+            'dir' => dirname(__DIR__)
+        ]
+    ])
+);
 
 Route::get('/', function(){
     include('views/homepage.php');
 });
 
-Route::get('/path/to/x/y/z/', [
-    'controller' => 'ExampleController',
-    'method' => 'exampleMethod'
+Route::get('/blog/posts/:id/', [
+    'controller' => 'PostController',
+    'method' => 'getPost'
 ]);
 
 Route::post('newsletter', [
