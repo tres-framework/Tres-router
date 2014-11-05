@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\controllers\Tres_tests {
+namespace tests\controllers {
     
     class HomeController extends BaseController {
         
