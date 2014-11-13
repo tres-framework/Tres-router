@@ -34,7 +34,7 @@ namespace packages\Tres\router {
         /**
          * The HTTP request.
          * 
-         * @var array
+         * @var string
          */
         protected static $_request = '';
         
@@ -55,6 +55,16 @@ namespace packages\Tres\router {
          */
         protected static $_actions = [];
         
+        /**
+         * The route key for the Not Found route.
+         */
+        const NOT_FOUND = 'error_404';
+        
+        /**
+         * Sets the config.
+         * 
+         * @param Config $config
+         */
         public static function setConfig(Config $config){
             self::$_config = $config->get();
         }
@@ -79,15 +89,19 @@ namespace packages\Tres\router {
             self::register('POST', $route, $action);
         }
         
+        public static function notFound($action){
+            self::register('GET', self::NOT_FOUND, $action);
+        }
+        
         /**
          * Registers a route.
          * 
          * @param  string         $request The HTTP request.
-         * @param  string         $route   The route path.
+         * @param  string|int     $route   The route path.
          * @param  callable|array $action  The route action.
          */
         public static function register($request, $route, $action){
-            if(!is_string($route)){
+            if($route !== self::NOT_FOUND && !is_string($route)){
                 throw new RouteException('Route path must be a string.');
             }
             
@@ -98,9 +112,19 @@ namespace packages\Tres\router {
                     throw new HTTPRouteException('The '.$request.' HTTP request is not supported.');
                 }
                 
-                self::$_routes[] = $route;
-                self::$_requests[] = $request;
-                self::$_actions[] = $action;
+                switch($route){
+                    case self::NOT_FOUND:
+                        self::$_routes[self::NOT_FOUND] = str_replace('_', '-', self::NOT_FOUND);
+                        self::$_requests[self::NOT_FOUND] = $request;
+                        self::$_actions[self::NOT_FOUND] = $action;
+                    break;
+                    
+                    default:
+                        self::$_routes[] = $route;
+                        self::$_requests[] = $request;
+                        self::$_actions[] = $action;
+                    break;
+                }
             }
         }
         
@@ -169,8 +193,14 @@ namespace packages\Tres\router {
                 }
             }
             
-            // TODO: Change to error 404.
-            throw new RouteException('Something went wrong.');
+            if(!isset(self::$_routes[self::NOT_FOUND])){
+                self::notFound(function(){
+                    header('HTTP/1.0 404 Not Found');
+                    echo '<h1>Error 404 - Not Found</h1><p>The page could not be found.</p>';
+                });
+            }
+            
+            self::_run(self::NOT_FOUND);
         }
         
         /**

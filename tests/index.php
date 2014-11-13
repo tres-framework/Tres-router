@@ -2,7 +2,7 @@
 
 use packages\Tres\router\RouteException;
 use packages\Tres\router\ConfigException;
-use packages\Tres\router\Config as RouteConfig;
+use packages\Tres\router\Config;
 
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -25,10 +25,10 @@ class_alias('packages\Tres\router\Route', 'Route');
 
 try {
     Route::setConfig(
-        new RouteConfig([
+        new Config([
             'root' => __DIR__,
             'controllers' => [
-                'namespace' => 'tests\\controllers\\Tres_tests',
+                'namespace' => 'tests\\controllers',
                 'dir' => dirname(__DIR__)
             ]
         ])

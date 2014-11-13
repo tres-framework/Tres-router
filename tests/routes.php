@@ -63,4 +63,9 @@ Route::get('/about', function(){
     echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
 });
 
+Route::notFound([
+    'controller' => 'ErrorController',
+    'method' => 'notFound',
+]);
+
 Route::dispatch();
