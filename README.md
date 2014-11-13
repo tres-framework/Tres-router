@@ -57,6 +57,11 @@ Route::register(['GET', 'POST'], 'contact', function(){
     include('views/thanks.php');
 });
 
+Route::notFound([
+    'controller' => 'ErrorController',
+    'method' => 'notFound'
+]);
+
 Route::dispatch();
 ```
 
