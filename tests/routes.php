@@ -2,8 +2,14 @@
 
 Route::get('/', [
     'controller' => 'HomeController',
-    'method' => 'exampleMethod'
+    'method' => 'exampleMethod',
+    'alias' => 'home'
 ]);
+
+Route::get('/about', function(){
+    echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
+    echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
+});
 
 /*Route::get('/users/:id/', function($id){
     echo 'ID: '.$id;
@@ -33,7 +39,8 @@ Route::get('/paramtest', [
         'first' => 1,
         'second' => '2',
         'third' => 'three'
-    ]
+    ],
+    'alias' => 'param'
 ]);
 
 Route::register(['GET', 'POST'], 'multi-request', function(){
@@ -58,9 +65,12 @@ Route::post('/form/get/post/', function(){
     echo '<pre>', print_r($_POST), '</pre>';
 });
 
-Route::get('/about', function(){
-    echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
-    echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
+Route::get('/url/tests/home', function(){
+    echo URL::route('home');
+});
+
+Route::get('/url/tests/paramtest', function(){
+    echo '<a href="'.URL::route('param').'">'.URL::route('param').'</a>';
 });
 
 Route::notFound([
