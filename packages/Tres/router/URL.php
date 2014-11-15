@@ -8,6 +8,10 @@ namespace packages\Tres\router {
     
     class URL {
         
+        // Prevents instantiation.
+        private function __construct(){}
+        private function __clone(){}
+        
         /**
          * Returns the absolute path from a route's alias.
          * 
@@ -22,7 +26,7 @@ namespace packages\Tres\router {
                    isset($route['options']['alias']) &&
                    $alias === $route['options']['alias']
                 ){
-                    return PUBLIC_DIR.'/'.trim($route['route'], '/');
+                    return PUBLIC_URL.'/'.trim($route['route'], '/');
                 }
             }
             
@@ -33,8 +37,8 @@ namespace packages\Tres\router {
          * Checks if the necessary constants are defined.
          */
         protected static function _checkConstants(){
-            if(!defined('PUBLIC_DIR')){
-                throw new URLException('No constant "PUBLIC_DIR" defined.');
+            if(!defined('PUBLIC_URL')){
+                throw new URLException('No constant "PUBLIC_URL" defined.');
             }
         }
         

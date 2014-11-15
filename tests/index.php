@@ -7,7 +7,7 @@ use packages\Tres\router\Config;
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-define('PUBLIC_DIR', 'http://tres-router.dev');
+define('PUBLIC_URL', 'http://tres-router.dev');
 
 spl_autoload_register(function($class){
     $file = dirname(__DIR__).'/'.str_replace('\\', '/', $class.'.php');
@@ -23,6 +23,7 @@ spl_autoload_register(function($class){
     }
 });
 
+class_alias('packages\Tres\router\Redirect', 'Redirect');
 class_alias('packages\Tres\router\Route', 'Route');
 class_alias('packages\Tres\router\URL', 'URL');
 
