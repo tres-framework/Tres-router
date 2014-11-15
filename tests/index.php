@@ -27,15 +27,13 @@ class_alias('packages\Tres\router\Route', 'Route');
 class_alias('packages\Tres\router\URL', 'URL');
 
 try {
-    Route::setConfig(
-        new Config([
-            'root' => __DIR__,
-            'controllers' => [
-                'namespace' => 'tests\\controllers',
-                'dir' => dirname(__DIR__)
-            ]
-        ])
-    );
+    Route::setConfig([
+        'root' => __DIR__,
+        'controllers' => [
+            'namespace' => 'tests\\controllers',
+            'dir' => dirname(__DIR__)
+        ]
+    ]);
 } catch(ConfigException $e){
     echo $e->getMessage();
 }

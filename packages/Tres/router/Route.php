@@ -63,10 +63,10 @@ namespace packages\Tres\router {
         /**
          * Sets the config.
          * 
-         * @param Config $config
+         * @param array $config
          */
-        public static function setConfig(Config $config){
-            self::$_config = $config->get();
+        public static function setConfig(array $config){
+            self::$_config = $config;
         }
         
         /**
