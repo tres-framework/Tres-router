@@ -238,8 +238,14 @@ namespace packages\Tres\router {
                         ], $args);
                         
                         return true;
-                    } else {
-                        throw new RouteException('Routes require at least a controller and a method.');
+                    } else if(isset($controller)){
+                        throw new RouteException('The "'.$controller.'" controller requires a method.');
+                    } else if(isset($method)){
+                        throw new RouteException('The "'.$method.'" method requires a controller.');
+                    } else { // No controller/method found. Search for callables.
+                        call_user_func_array(self::$_options[$routeKey][0], $args);
+                        
+                        return true;
                     }
                 } else if(is_callable(self::$_options[$routeKey])){
                     call_user_func_array(self::$_options[$routeKey], $args);

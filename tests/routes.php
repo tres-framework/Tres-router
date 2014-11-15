@@ -3,13 +3,22 @@
 Route::get('/', [
     'controller' => 'HomeController',
     'method' => 'exampleMethod',
-    'alias' => 'home'
+    'alias' => 'home',
+    function(){
+        echo 'HOME!';
+    }
 ]);
 
-Route::get('/about', function(){
-    echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
-    echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
-});
+Route::get('/about', [
+    'alias' => 'about',
+    function(){
+        echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
+        echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
+    },
+    function(){
+        echo 'Won\'t run.';
+    }
+]);
 
 /*Route::get('/users/:id/', function($id){
     echo 'ID: '.$id;
@@ -67,6 +76,10 @@ Route::post('/form/get/post/', function(){
 
 Route::get('/url/tests/home', function(){
     echo URL::route('home');
+});
+
+Route::get('/url/tests/about', function(){
+    echo '<a href="'.URL::route('about').'">'.URL::route('about').'</a>';
 });
 
 Route::get('/url/tests/paramtest', function(){
