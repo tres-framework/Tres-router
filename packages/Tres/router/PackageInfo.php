@@ -13,7 +13,7 @@ namespace packages\Tres\router {
          * @var array
          */
         protected static $_info = [
-            'version' => '0.5.1',
+            'version' => '0.5.2',
             
             'contributors' => [
                 'pedzed' => [
