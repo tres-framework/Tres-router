@@ -44,7 +44,7 @@ Route::get('/blog/posts/:id/', [
     'method' => 'getPost'
 ]);
 
-Route::post('newsletter', [
+Route::post('/newsletter', [
     'controller' => 'NewsletterController',
     'method' => 'thankUser',
     'args' => [
@@ -53,7 +53,7 @@ Route::post('newsletter', [
     ]
 ]);
 
-Route::register(['GET', 'POST'], 'contact', function(){
+Route::register(['GET', 'POST'], '/contact', function(){
     include('views/thanks.php');
 });
 
@@ -63,6 +63,16 @@ Route::notFound([
 ]);
 
 Route::dispatch();
+```
+### Aliasing
+```php
+Route::get('/alias/test', [
+    'alias' => 'test',
+    'controller' => 'ExampleController',
+    'method' => 'renderPage'
+]);
+
+echo '<a href="'.URL::route('test').'"></a>';
 ```
 
 *This package is inspired by [Macaw router](https://github.com/NoahBuscher/Macaw).*
