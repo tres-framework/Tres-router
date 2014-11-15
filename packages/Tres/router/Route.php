@@ -171,12 +171,7 @@ namespace packages\Tres\router {
                 foreach($matchedRoutes as $route){
                     $routeMatched = self::_run($route);
                 }
-                
-                if($routeMatched){
-                    return true;
-                }
             } else { // Dynamic URL
-                
                 $splitURI = explode('/', trim($uri, '/'));
                 
                 foreach(self::$_routes as $routeKey => $route){
@@ -190,21 +185,21 @@ namespace packages\Tres\router {
                     if($args = self::_getArgs($splitRoute, $splitURI)){
                         $routeMatched = self::_run($routeKey, $args);
                     }
-                    
-                    if($routeMatched){
-                        return true;
-                    }
                 }
             }
             
-            if(!isset(self::$_routes[self::NOT_FOUND])){
-                self::notFound(function(){
-                    header('HTTP/1.0 404 Not Found');
-                    echo '<h1>Error 404 - Not Found</h1><p>The page could not be found.</p>';
-                });
+            if(!$routeMatched){
+                if(!isset(self::$_routes[self::NOT_FOUND])){
+                    self::notFound(function(){
+                        header('HTTP/1.0 404 Not Found');
+                        echo '<h1>Error 404 - Not Found</h1><p>The page could not be found.</p>';
+                    });
+                }
+                
+                self::_run(self::NOT_FOUND);
             }
             
-            self::_run(self::NOT_FOUND);
+            return $routeMatched;
         }
         
         /**
