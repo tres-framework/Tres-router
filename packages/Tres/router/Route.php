@@ -233,7 +233,7 @@ namespace packages\Tres\router {
                         }
                         
                         call_user_func_array([
-                            new $controller(),
+                            new $controller($args),
                             $method
                         ], $args);
                         
