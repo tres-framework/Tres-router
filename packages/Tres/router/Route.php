@@ -219,7 +219,7 @@ namespace packages\Tres\router {
                         $controller = self::$_config['controllers']['namespace'].'\\'.$controllerName;
                         
                         $controllerFile  = self::$_config['controllers']['dir'].'/';
-                        $controllerFile .= str_replace('\\', '/', $controller);
+                        $controllerFile .= str_replace('\\', '/', $controllerName);
                         $controllerFile .= '.php';
                         
                         if(!is_readable($controllerFile)){
