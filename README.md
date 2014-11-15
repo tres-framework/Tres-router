@@ -20,20 +20,18 @@ but also that it's prettier for humans like you and me.
 ```php
 <?php
 
-Route::setConfig(
-    new RouteConfig([
-        // Route's basepath.
-        'root' => __DIR__,
+Route::setConfig([
+    // Route's basepath.
+    'root' => __DIR__,
+    
+    'controllers' => [
+        // The namespace for all controllers.
+        'namespace' => 'controllers',
         
-        'controllers' => [
-            // The namespace for all controllers.
-            'namespace' => 'controllers',
-            
-            // The directory the controllers are stored in.
-            'dir' => dirname(__DIR__)
-        ]
-    ])
-);
+        // The directory the controllers are stored in.
+        'dir' => dirname(__DIR__)
+    ]
+]);
 
 Route::get('/', function(){
     include('views/homepage.php');
