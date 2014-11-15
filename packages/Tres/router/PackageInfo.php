@@ -2,18 +2,33 @@
 
 namespace packages\Tres\router {
     
+    /**
+     * Information about this package.
+     */
     class PackageInfo {
         
-        public static function get(){
-            return [
-                'version' => '0.5',
-                
-                'contributors' => [
-                    'pedzed' => [
-                        'profile' => 'https://github.com/pedzed/'
-                    ]
+        /**
+         * The package information.
+         * 
+         * @var array
+         */
+        protected static $_info = [
+            'version' => '0.5',
+            
+            'contributors' => [
+                'pedzed' => [
+                    'profile' => 'https://github.com/pedzed/'
                 ]
-            ];
+            ]
+        ];
+        
+        /**
+         * Gets the info.
+         * 
+         * @return array
+         */
+        public static function get(){
+            return self::$_info;
         }
         
     }
