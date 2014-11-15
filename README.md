@@ -72,7 +72,17 @@ Route::get('/alias/test', [
     'method' => 'renderPage'
 ]);
 
-echo '<a href="'.URL::route('test').'"></a>';
+Route::get('/about', [
+    'alias' => 'about',
+    
+    function(){
+        echo '<h1 style="font-family:Calibri, sans-serif;">Tres router</h1>';
+        echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
+    }
+]);
+
+echo '<a href="'.URL::route('test').'">Test</a><br />';
+echo '<a href="'.URL::route('about').'">About</a><br />';
 ```
 
 *This package is inspired by [Macaw router](https://github.com/NoahBuscher/Macaw).*
