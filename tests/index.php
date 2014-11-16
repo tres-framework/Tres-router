@@ -32,7 +32,7 @@ try {
         'root' => __DIR__,
         'controllers' => [
             'namespace' => 'tests\\controllers',
-            'dir' => dirname(__DIR__)
+            'dir' => __DIR__.'/controllers'
         ]
     ]);
 } catch(ConfigException $e){
