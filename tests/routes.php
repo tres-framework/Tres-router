@@ -13,7 +13,7 @@ Route::get('/about', [
     'alias' => 'about',
     function(){
         echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
-        echo '<pre>', print_r(\packages\Tres\router\PackageInfo::get()), '</pre>';
+        echo '<pre>', print_r(Tres\router\PackageInfo::get()), '</pre>';
     },
     function(){
         echo 'Won\'t run.';

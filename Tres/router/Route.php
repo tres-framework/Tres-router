@@ -1,9 +1,9 @@
 <?php
 
-namespace packages\Tres\router {
+namespace Tres\router {
     
     use Exception;
-    use packages\Tres\router\Config;
+    use Tres\router\Config;
     
     class HTTPRouteException extends Exception implements ExceptionInterface {}
     class RouteException extends Exception implements ExceptionInterface {}

@@ -1,6 +1,6 @@
 <?php
 
-namespace packages\Tres\router {
+namespace Tres\router {
     
     interface ExceptionInterface {}
     
