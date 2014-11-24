@@ -13,7 +13,7 @@ namespace Tres\router {
          * @var array
          */
         protected static $_info = [
-            'version' => '0.5.2',
+            'version' => '0.6',
             
             'contributors' => [
                 'pedzed' => [
