@@ -1,5 +1,7 @@
 <?php
 
+Route::import('routes-2.php');
+
 Route::get('/', [
     'controller' => 'HomeController',
     'method' => 'exampleMethod',

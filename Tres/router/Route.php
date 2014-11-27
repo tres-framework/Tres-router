@@ -258,6 +258,19 @@ namespace Tres\router {
         }
         
         /**
+         * Imports routes from another file.
+         * 
+         * @param string $file The path to the file.
+         */
+        public static function import($file){
+            if(is_readable($file)){
+                require_once($file);
+            } else {
+                throw new RouteException('Failed to import route. Does it exist?');
+            }
+        }
+        
+        /**
          * Gets a list of routes including its request and options.
          * 
          * @return array
