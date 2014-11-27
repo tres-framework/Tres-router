@@ -33,6 +33,8 @@ Route::setConfig([
     ]
 ]);
 
+Route::import('path/to/second/routes.php');
+
 Route::get('/', function(){
     include('views/homepage.php');
 });
