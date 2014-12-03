@@ -1,5 +1,7 @@
 <?php
 
+Route::import('grouping-routes.php');
+
 Route::get('/', [
     'controller' => 'HomeController',
     'method' => 'exampleMethod',
@@ -19,10 +21,6 @@ Route::get('/about', [
         echo 'Won\'t run.';
     }
 ]);
-
-/*Route::get('/users/:id/', function($id){
-    echo 'ID: '.$id;
-});*/
 
 Route::get('/users/:username/', [
     'controller' => 'UserController',
