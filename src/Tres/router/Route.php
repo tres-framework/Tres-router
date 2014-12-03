@@ -222,13 +222,13 @@ namespace Tres\router {
                         $controllerFile .= str_replace('\\', '/', $controllerName);
                         $controllerFile .= '.php';
                         
-                        if(!is_readable($controllerFile)){
-                            throw new RouteException('Controller "'.$controllerName.'" is not found.');
+                        if(!class_exists($controller)){
+                            throw new RouteException('Controller '.$controllerName.' is not found in '.$controllerFile.'.');
                         }
                         
                         if(!method_exists($controller, $method)){
                             throw new RouteException(
-                                'Method "'.$method.'" does not exist in the "'.$controllerName.'" controller.'
+                                'Method '.$method.' does not exist in the '.$controllerName.' controller.'
                             );
                         }
                         
@@ -239,9 +239,9 @@ namespace Tres\router {
                         
                         return true;
                     } else if(isset($controller)){
-                        throw new RouteException('The "'.$controller.'" controller requires a method.');
+                        throw new RouteException('The '.$controller.' controller requires a method.');
                     } else if(isset($method)){
-                        throw new RouteException('The "'.$method.'" method requires a controller.');
+                        throw new RouteException('The '.$method.' method requires a controller.');
                     } else { // No controller/method found. Search for callables.
                         call_user_func_array(self::$_options[$routeKey][0], $args);
                         
