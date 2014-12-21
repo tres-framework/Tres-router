@@ -7,6 +7,10 @@ use Tres\router\Config;
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+set_exception_handler(function($e){
+    echo '<br /><b>Exception:</b> '.$e->getMessage();
+});
+
 define('PUBLIC_URL', 'http://tres-router.dev');
 
 $dirs = [

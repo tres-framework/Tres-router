@@ -25,6 +25,13 @@ namespace Tres\router {
         protected static $_routes = [];
         
         /**
+         * The route prefixes.
+         * 
+         * @var array
+         */
+        protected static $_prefixes = [];
+        
+        /**
          * The route HTTP requests.
          * 
          * @var array
@@ -59,6 +66,11 @@ namespace Tres\router {
          * The route key for the Not Found route.
          */
         const NOT_FOUND = 'error_404';
+        
+        /**
+         * The prefix separator.
+         */
+        const PREFIX_SEPARATOR = '.';
         
         /**
          * Sets the config.
@@ -110,11 +122,31 @@ namespace Tres\router {
                 throw new RouteException('Route path must be a string.');
             }
             
+            $backtraces = debug_backtrace();
+            $prefix = '';
+            
+            foreach(array_reverse($backtraces) as $backtrace){
+                if(isset($backtrace['function']) && $backtrace['function'] === 'group'){
+                    if(is_string($backtrace['args'][0])){
+                        $prefix .= $backtrace['args'][0].'.';
+                    } else if(is_array($backtrace['args'][0])){
+                        $prefix .= $backtrace['args'][0]['prefix'].'.';
+                    }
+                }
+            }
+            
+            $routePrefix = str_replace('.', '/', $prefix);
+            $routePrefix = rtrim($routePrefix, '/');
+            
             $requests = is_array($request) ? $request : [$request];
             
             foreach($requests as $request){
                 if(!in_array($request, self::$_acceptedRequests)){
                     throw new HTTPRouteException('The '.$request.' HTTP request is not supported.');
+                }
+                
+                if(is_array($options) && isset($options['alias'])){
+                    $options['alias'] = $prefix.$options['alias'];
                 }
                 
                 switch($route){
@@ -125,7 +157,7 @@ namespace Tres\router {
                     break;
                     
                     default:
-                        self::$_routes[] = $route;
+                        self::$_routes[] = $routePrefix.$route;
                         self::$_requests[] = $request;
                         self::$_options[] = $options;
                     break;
@@ -270,8 +302,60 @@ namespace Tres\router {
             }
         }
         
+        /**
+         * Groups routes together.
+         */
         public static function group(){
-            echo __METHOD__.'<br />';
+            $args = func_get_args();
+            
+            if(count($args) === 1){
+                if(!is_callable($args[0])){
+                    throw new RouteException('The first and only argument must be callable.');
+                }
+            } else if(count($args) === 2){
+                if(!is_callable($args[1])){
+                    throw new RouteException('The second argument must be callable.');
+                }
+                
+                $backtraces = debug_backtrace();
+                unset($backtraces[0]);
+                $prefixString = '';
+                
+                foreach($backtraces as $backtrace){
+                    if(isset($backtrace['function']) && $backtrace['function'] === 'group'){
+                        if(is_string($backtrace['args'][0])){
+                            $prefixString .= $backtrace['args'][0].'.';
+                        } else if(is_array($backtrace['args'][0])){
+                            $prefixString .= $backtrace['args'][0]['prefix'].'.';
+                        }
+                    }
+                }
+                
+                switch(gettype($args[0])){
+                    case 'string':
+                        $prefixString .= $args[0];
+                    break;
+                    
+                    case 'array':
+                        if(isset($args[0]['prefix'])){
+                            $prefixString .= $args[0]['prefix'];
+                        }
+                        
+                        // TODO: Add filters (https://github.com/tres-framework/Tres-router/issues/8)
+                    break;
+                    
+                    default:
+                        throw new RouteException('The first argument type is not valid.');
+                    break;
+                }
+                
+                $prefixString = rtrim($prefixString, '.');
+                self::_addPrefix($prefixString);
+                
+                call_user_func($args[1]);
+            } else {
+                throw new RouteException('The supplied amount of arguments is not valid.');
+            }
         }
         
         /**
@@ -291,6 +375,30 @@ namespace Tres\router {
             }
             
             return $list;
+        }
+        
+        /**
+         * Adds a prefix which might be nested.
+         * 
+         * @param string $prefixString The prefix string containing the prefix and its sub-prefixes.
+         */
+        protected static function _addPrefix($prefixString){
+            $prefixStack = explode(self::PREFIX_SEPARATOR, $prefixString);
+            $finalKey = count($prefixStack) - 1;
+            
+            $reference = &self::$_prefixes;
+            
+            foreach($prefixStack as $key => $part){
+                if($finalKey !== $key){
+                    if(empty($reference[$part])){
+                        $reference[$part] = [];
+                    }
+                    
+                    $reference = &$reference[$part];
+                } else {
+                    $reference[$part] = [];
+                }
+            }
         }
         
         /**

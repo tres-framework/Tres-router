@@ -3,11 +3,10 @@
 Route::import('grouping-routes.php');
 
 Route::get('/', [
-    'controller' => 'HomeController',
-    'method' => 'exampleMethod',
     'alias' => 'home',
     function(){
-        echo 'HOME!';
+        echo "URL::route('gtest.home') = ".URL::route('gtest.home').'<br />';
+        echo "URL::route('gtest3.nested.alias-test') = ".URL::route('gtest3.nested.alias-test').'<br />';
     }
 ]);
 
