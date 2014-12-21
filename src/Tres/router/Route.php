@@ -68,11 +68,6 @@ namespace Tres\router {
         const NOT_FOUND = 'error_404';
         
         /**
-         * The prefix separator.
-         */
-        const PREFIX_SEPARATOR = '.';
-        
-        /**
          * Sets the config.
          * 
          * @param array $config
@@ -383,7 +378,7 @@ namespace Tres\router {
          * @param string $prefixString The prefix string containing the prefix and its sub-prefixes.
          */
         protected static function _addPrefix($prefixString){
-            $prefixStack = explode(self::PREFIX_SEPARATOR, $prefixString);
+            $prefixStack = explode('.', $prefixString);
             $finalKey = count($prefixStack) - 1;
             
             $reference = &self::$_prefixes;
