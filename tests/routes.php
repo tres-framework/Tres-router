@@ -22,8 +22,10 @@ Route::get('/about', [
 ]);
 
 Route::get('/users/:username/', [
-    'controller' => 'UserController',
-    'method' => 'getProfile'
+    'uses' => 'UserController@getProfile',
+    'args' => [
+        'test'
+    ]
 ]);
 
 Route::get('/posts/:id/:title', function($id, $title){
@@ -39,8 +41,7 @@ Route::get('/posts/:id/:title', function($id, $title){
 });
 
 Route::get('/paramtest', [
-    'controller' => 'HomeController',
-    'method' => 'exampleMethod2',
+    'uses' => 'HomeController@exampleMethod2',
     'args' => [
         'first' => 1,
         'second' => '2',
@@ -84,8 +85,7 @@ Route::get('/url/tests/paramtest', function(){
 });
 
 Route::notFound([
-    'controller' => 'ErrorController',
-    'method' => 'notFound',
+    'uses' => 'ErrorController@notFound'
 ]);
 
 Route::dispatch();

@@ -3,6 +3,7 @@
 namespace Tres\router {
     
     use Exception;
+    use ReflectionClass;
     use Tres\router\Config;
     
     class HTTPRouteException extends Exception implements ExceptionInterface {}
@@ -234,52 +235,70 @@ namespace Tres\router {
          * 
          * @param  int   $routeKey The key of the route.
          * @param  array $args     (Optional) The arguments to pass to the route.
-         * @return mixed
+         * 
+         * @return bool
          */
-        public static function _run($routeKey, $args = []){
+        protected static function _run($routeKey, $args = []){
             if(self::$_requests[$routeKey] === self::$_request){
-                if(is_array(self::$_options[$routeKey])){
-                    extract(self::$_options[$routeKey]);
-                    
-                    if(isset($controller, $method)){
-                        $controllerName = $controller;
-                        $controller = self::$_config['controllers']['namespace'].'\\'.$controllerName;
+                $options = self::$_options[$routeKey];
+                
+                if(is_callable($options)){
+                    call_user_func_array($options, $args);
+                    return true;
+                } else if(is_array($options)){
+                    if(isset($options['args'])){
+                        if(!is_array($options['args'])){
+                            throw new RouteException('The args argument must be an array.');
+                        }
                         
-                        $controllerFile  = self::$_config['controllers']['dir'].'/';
-                        $controllerFile .= str_replace('\\', '/', $controllerName);
-                        $controllerFile .= '.php';
+                        $args = array_merge($args, $options['args']);
+                    }
+                    
+                    if(isset($options['uses'])){
+                        if(empty($options['uses'])){
+                            throw new RouteException('The "uses" argument cannot be empty.');
+                        }
+                        
+                        $options['uses'] = explode('@', $options['uses'], 2);
+                        $controller = $options['uses'][0];
+                        $method = (isset($options['uses'][1])) ? $options['uses'][1] : null;
+                        $controller = self::$_config['controllers']['namespace'].'\\'.$controller;
+                        
+                        $controllerFile  = str_replace('\\', '/', self::$_config['controllers']['dir'].'/').'.php';
                         
                         if(!class_exists($controller)){
-                            throw new RouteException('Controller '.$controllerName.' is not found in '.$controllerFile.'.');
+                            throw new RouteException('Controller '.$controller.' is not found in '.$controllerFile.'.');
                         }
                         
-                        if(!method_exists($controller, $method)){
-                            throw new RouteException(
-                                'Method '.$method.' does not exist in the '.$controllerName.' controller.'
-                            );
+                        if(!isset($method)){
+                            $class = new ReflectionClass($controller);
+                            $class->newInstanceArgs($args);
+                        } else {
+                            if(!method_exists($controller, $method)){
+                                throw new RouteException(
+                                    'Method '.$method.' does not exist in the '.$controller.' controller.'
+                                );
+                            }
+                            
+                            call_user_func_array([
+                                new $controller,
+                                $method
+                            ], $args);
                         }
-                        
-                        call_user_func_array([
-                            new $controller($args),
-                            $method
-                        ], $args);
                         
                         return true;
-                    } else if(isset($controller)){
-                        throw new RouteException('The '.$controller.' controller requires a method.');
-                    } else if(isset($method)){
-                        throw new RouteException('The '.$method.' method requires a controller.');
                     } else { // No controller/method found. Search for callables.
-                        call_user_func_array(self::$_options[$routeKey][0], $args);
-                        
-                        return true;
+                        foreach($options as $option){
+                            if(is_callable($option)){
+                                call_user_func_array($option, $args);
+                                return true;
+                            }
+                        }
                     }
-                } else if(is_callable(self::$_options[$routeKey])){
-                    call_user_func_array(self::$_options[$routeKey], $args);
                     
-                    return true;
+                    throw new RouteException('Neither a "uses" method nor a callable provided.');
                 } else {
-                    throw new RouteException('Second argument is not an array, nor a callback.');
+                    throw new RouteException('Second argument is neither an array nor a callable.');
                 }
             }
         }
@@ -336,6 +355,7 @@ namespace Tres\router {
                             $prefixString .= $args[0]['prefix'];
                         }
                         
+                        // TODO: Support multiple namespaces (https://github.com/tres-framework/Tres-router/issues/6)
                         // TODO: Add filters (https://github.com/tres-framework/Tres-router/issues/8)
                     break;
                     
