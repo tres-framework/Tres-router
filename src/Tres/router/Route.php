@@ -26,13 +26,6 @@ namespace Tres\router {
         protected static $_routes = [];
         
         /**
-         * The Not Found route paths.
-         * 
-         * @var array
-         */
-        protected static $_notFoundRoutes = [];
-        
-        /**
          * The route prefixes.
          * 
          * @var array
@@ -252,10 +245,6 @@ namespace Tres\router {
          * @return bool
          */
         protected static function _run($routeKey, $args = []){
-//echo '<pre>', print_r(self::$_routes), '</pre>';
-//echo '<pre>', print_r(self::$_requests), '</pre>';
-//echo '<pre>', print_r(self::$_options), '</pre>'; die;
-            
             if(self::$_requests[$routeKey] === self::$_request){
                 $options = self::$_options[$routeKey];
                 
