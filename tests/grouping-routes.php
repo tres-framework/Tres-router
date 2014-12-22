@@ -39,6 +39,18 @@ Route::group([
     
 });
 
+Route::group('gtest2.separated.with', function(){
+    
+    Route::group('dot.nested-again', function(){ // TODO: Fix overwrite
+        
+        Route::get('/nest-test', function(){
+            echo 'Another nest test.';
+        });
+        
+    });
+    
+});
+
 Route::group('gtest3', function(){
     
     Route::group('nested', function(){
@@ -49,6 +61,10 @@ Route::group('gtest3', function(){
                 echo 'You are now at /gtest3/nested/test.';
             }
         ]);
+        
+        Route::notFound(function(){
+            echo 'gtest3/tested/Route::notFound';
+        });
         
     });
     

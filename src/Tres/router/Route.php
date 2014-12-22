@@ -26,6 +26,13 @@ namespace Tres\router {
         protected static $_routes = [];
         
         /**
+         * The Not Found route paths.
+         * 
+         * @var array
+         */
+        protected static $_notFoundRoutes = [];
+        
+        /**
          * The route prefixes.
          * 
          * @var array
@@ -64,9 +71,9 @@ namespace Tres\router {
         protected static $_options = [];
         
         /**
-         * The route key for the Not Found route.
+         * The name/suffix used to identify a Not Found route.
          */
-        const NOT_FOUND = 'error_404';
+        const NOT_FOUND = '_404';
         
         /**
          * Sets the config.
@@ -147,9 +154,10 @@ namespace Tres\router {
                 
                 switch($route){
                     case self::NOT_FOUND:
-                        self::$_routes[self::NOT_FOUND] = str_replace('_', '-', self::NOT_FOUND);
-                        self::$_requests[self::NOT_FOUND] = $request;
-                        self::$_options[self::NOT_FOUND] = $options;
+                        $route = $prefix.self::NOT_FOUND;
+                        self::$_routes[$route] = $route;
+                        self::$_requests[$route] = $request;
+                        self::$_options[$route] = $options;
                     break;
                     
                     default:
@@ -186,7 +194,12 @@ namespace Tres\router {
             $routes = [];
             $routeMatched = false;
             
-            foreach(self::$_routes as $route){
+            foreach(self::$_routes as $k => $route){
+                // Continues to next loop if the key doesn't end with the value of self::NOT_FOUND.
+                if(substr($k, -strlen(self::NOT_FOUND)) === self::NOT_FOUND){
+                    continue;
+                }
+                
                 $route = '/'.ltrim($route, '/');
                 $route = rtrim($route, '/').'/';
                 $routes[] = $route;
@@ -220,7 +233,7 @@ namespace Tres\router {
                 if(!isset(self::$_routes[self::NOT_FOUND])){
                     self::notFound(function(){
                         header('HTTP/1.0 404 Not Found');
-                        echo '<h1>Error 404 - Not Found</h1><p>The page could not be found.</p>';
+                        echo '<p>Not Found (404).</p>';
                     });
                 }
                 
@@ -239,6 +252,10 @@ namespace Tres\router {
          * @return bool
          */
         protected static function _run($routeKey, $args = []){
+//echo '<pre>', print_r(self::$_routes), '</pre>';
+//echo '<pre>', print_r(self::$_requests), '</pre>';
+//echo '<pre>', print_r(self::$_options), '</pre>'; die;
+            
             if(self::$_requests[$routeKey] === self::$_request){
                 $options = self::$_options[$routeKey];
                 
@@ -411,7 +428,7 @@ namespace Tres\router {
                     
                     $reference = &$reference[$part];
                 } else {
-                    $reference[$part] = [];
+                    $reference[$part] = null;
                 }
             }
         }
