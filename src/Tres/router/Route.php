@@ -26,13 +26,6 @@ namespace Tres\router {
         protected static $_routes = [];
         
         /**
-         * The route prefixes.
-         * 
-         * @var array
-         */
-        protected static $_prefixes = [];
-        
-        /**
          * The route HTTP requests.
          * 
          * @var array
@@ -127,6 +120,9 @@ namespace Tres\router {
                         $prefix .= $backtrace['args'][0].'.';
                     } else if(is_array($backtrace['args'][0])){
                         $prefix .= $backtrace['args'][0]['prefix'].'.';
+                        
+                        // TODO: Support multiple namespaces (https://github.com/tres-framework/Tres-router/issues/6)
+                        // TODO: Add filters (https://github.com/tres-framework/Tres-router/issues/8)
                     }
                 }
             }
@@ -230,7 +226,7 @@ namespace Tres\router {
                     });
                 }
                 
-                self::_run(self::NOT_FOUND);
+                self::_run(self::NOT_FOUND); // TODO: Support grouped Not Found's.
             }
             
             return $routeMatched;
@@ -333,47 +329,17 @@ namespace Tres\router {
                     throw new RouteException('The first and only argument must be callable.');
                 }
             } else if(count($args) === 2){
-                if(!is_callable($args[1])){
+                list($options, $callable) = $args;
+                
+                if(!is_callable($callable)){
                     throw new RouteException('The second argument must be callable.');
                 }
                 
-                $backtraces = debug_backtrace();
-                unset($backtraces[0]);
-                $prefixString = '';
-                
-                foreach($backtraces as $backtrace){
-                    if(isset($backtrace['function']) && $backtrace['function'] === 'group'){
-                        if(is_string($backtrace['args'][0])){
-                            $prefixString .= $backtrace['args'][0].'.';
-                        } else if(is_array($backtrace['args'][0])){
-                            $prefixString .= $backtrace['args'][0]['prefix'].'.';
-                        }
-                    }
+                if(!is_string($options) && !is_array($options)){
+                    throw new RouteException('The first argument type is not valid.');
                 }
                 
-                switch(gettype($args[0])){
-                    case 'string':
-                        $prefixString .= $args[0];
-                    break;
-                    
-                    case 'array':
-                        if(isset($args[0]['prefix'])){
-                            $prefixString .= $args[0]['prefix'];
-                        }
-                        
-                        // TODO: Support multiple namespaces (https://github.com/tres-framework/Tres-router/issues/6)
-                        // TODO: Add filters (https://github.com/tres-framework/Tres-router/issues/8)
-                    break;
-                    
-                    default:
-                        throw new RouteException('The first argument type is not valid.');
-                    break;
-                }
-                
-                $prefixString = rtrim($prefixString, '.');
-                self::_addPrefix($prefixString);
-                
-                call_user_func($args[1]);
+                call_user_func($callable);
             } else {
                 throw new RouteException('The supplied amount of arguments is not valid.');
             }
@@ -396,30 +362,6 @@ namespace Tres\router {
             }
             
             return $list;
-        }
-        
-        /**
-         * Adds a prefix which might be nested.
-         * 
-         * @param string $prefixString The prefix string containing the prefix and its sub-prefixes.
-         */
-        protected static function _addPrefix($prefixString){
-            $prefixStack = explode('.', $prefixString);
-            $finalKey = count($prefixStack) - 1;
-            
-            $reference = &self::$_prefixes;
-            
-            foreach($prefixStack as $key => $part){
-                if($finalKey !== $key){
-                    if(empty($reference[$part])){
-                        $reference[$part] = [];
-                    }
-                    
-                    $reference = &$reference[$part];
-                } else {
-                    $reference[$part] = null;
-                }
-            }
         }
         
         /**
