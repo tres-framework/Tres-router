@@ -113,15 +113,24 @@ namespace Tres\router {
             
             $backtraces = debug_backtrace();
             $prefix = '';
+            $namespace = self::$_config['default_controller_namespace'];
             
+            // Gets group info if available.
             foreach(array_reverse($backtraces) as $backtrace){
                 if(isset($backtrace['function']) && $backtrace['function'] === 'group'){
                     if(is_string($backtrace['args'][0])){
                         $prefix .= $backtrace['args'][0].'.';
                     } else if(is_array($backtrace['args'][0])){
-                        $prefix .= $backtrace['args'][0]['prefix'].'.';
+                        $groupOptions = $backtrace['args'][0];
                         
-                        // TODO: Support multiple namespaces (https://github.com/tres-framework/Tres-router/issues/6)
+                        if(isset($groupOptions['prefix'])){
+                            $prefix .= $groupOptions['prefix'].'.';
+                        }
+                        
+                        if(isset($groupOptions['namespace'])){
+                            $namespace = $groupOptions['namespace'];
+                        }
+                        
                         // TODO: Add filters (https://github.com/tres-framework/Tres-router/issues/8)
                     }
                 }
@@ -137,8 +146,14 @@ namespace Tres\router {
                     throw new HTTPRouteException('The '.$request.' HTTP request is not supported.');
                 }
                 
-                if(is_array($options) && isset($options['alias'])){
-                    $options['alias'] = $prefix.$options['alias'];
+                if(is_array($options)){
+                    if(isset($options['alias'])){
+                        $options['alias'] = $prefix.$options['alias'];
+                    }
+                    
+                    if(!isset($options['namespace'])){
+                        $options['namespace'] = $namespace;
+                    }
                 }
                 
                 switch($route){
@@ -262,14 +277,19 @@ namespace Tres\router {
                         }
                         
                         $options['uses'] = explode('@', $options['uses'], 2);
-                        $controller = $options['uses'][0];
                         $method = (isset($options['uses'][1])) ? $options['uses'][1] : null;
-                        $controller = self::$_config['controllers']['namespace'].'\\'.$controller;
                         
-                        $controllerFile  = str_replace('\\', '/', self::$_config['controllers']['dir'].'/').'.php';
+                        if(isset($options['namespace'])){
+                            $namespace = $options['namespace'];
+                        } else {
+                            $namespace = self::$_config['default_controller_namespace'];
+                        }
+                        
+                        $controller = $options['uses'][0];
+                        $controller = $namespace.'\\'.$controller;
                         
                         if(!class_exists($controller)){
-                            throw new RouteException('Controller '.$controller.' is not found in '.$controllerFile.'.');
+                            throw new RouteException('Controller '.$controller.' is not found.');
                         }
                         
                         if(!isset($method)){

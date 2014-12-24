@@ -36,11 +36,7 @@ class_alias('Tres\router\URL', 'URL');
 try {
     Route::setConfig([
         'root' => __DIR__,
-        
-        'controllers' => [
-            'namespace' => 'controllers',
-            'dir' => __DIR__.'/controllers'
-        ]
+        'default_controller_namespace' => 'controllers'
     ]);
 } catch(ConfigException $e){
     echo $e->getMessage();

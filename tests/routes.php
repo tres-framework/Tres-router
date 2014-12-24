@@ -50,6 +50,26 @@ Route::get('/paramtest', [
     'alias' => 'param'
 ]);
 
+Route::get('/namespacetest/:msg', [
+    'uses' => 'ExampleController@showMessage',
+    'namespace' => ''
+]);
+
+Route::get('/subcontroller', [
+    'uses' => 'SubController@testMethod',
+    'namespace' => 'controllers\subcontroller_tests'
+]);
+
+Route::group([
+    'namespace' => 'controllers\subcontroller_tests'
+], function(){
+    
+    Route::get('/subcontroller2', [
+        'uses' => 'SubController@testMethod',
+    ]);
+    
+});
+
 Route::register(['GET', 'POST'], 'multi-request', function(){
     echo (isset($_POST) && !empty($_POST)) ? 'POST' : 'GET', '<br />';
     ?>
