@@ -91,20 +91,20 @@ namespace Tres\router {
         }
         
         /**
-         * Registers the Not Found route.
+         * Registers a Not Found route.
          * 
-         * @param  callable|array $options The route options.
+         * @param callable|array $options The route options.
          */
         public static function notFound($options){
             self::register('GET', self::NOT_FOUND, $options);
         }
         
         /**
-         * Registers a route.
+         * Registers a route with its information (request, path, options).
          * 
-         * @param  string         $request The HTTP request.
-         * @param  string|int     $route   The route path.
-         * @param  callable|array $options The route options.
+         * @param string|array   $request The HTTP request(s).
+         * @param string|int     $route   The route path.
+         * @param callable|array $options The route options.
          */
         public static function register($request, $route, $options){
             if($route !== self::NOT_FOUND && !is_string($route)){
@@ -113,7 +113,6 @@ namespace Tres\router {
             
             $backtraces = debug_backtrace();
             $prefix = '';
-            $namespace = self::$_config['default_controller_namespace'];
             
             // Gets group info if available.
             foreach(array_reverse($backtraces) as $backtrace){
@@ -127,10 +126,6 @@ namespace Tres\router {
                             $prefix .= $groupOptions['prefix'].'.';
                         }
                         
-                        if(isset($groupOptions['namespace'])){
-                            $namespace = $groupOptions['namespace'];
-                        }
-                        
                         // TODO: Add filters (https://github.com/tres-framework/Tres-router/issues/8)
                     }
                 }
@@ -138,7 +133,6 @@ namespace Tres\router {
             
             $routePrefix = str_replace('.', '/', $prefix);
             $routePrefix = rtrim($routePrefix, '/');
-            
             $requests = is_array($request) ? $request : [$request];
             
             foreach($requests as $request){
@@ -151,8 +145,8 @@ namespace Tres\router {
                         $options['alias'] = $prefix.$options['alias'];
                     }
                     
-                    if(!isset($options['namespace'])){
-                        $options['namespace'] = $namespace;
+                    if(!isset($options['namespace']) && isset($groupOptions['namespace'])){
+                        $options['namespace'] = $groupOptions['namespace'];
                     }
                 }
                 
@@ -265,7 +259,7 @@ namespace Tres\router {
                 } else if(is_array($options)){
                     if(isset($options['args'])){
                         if(!is_array($options['args'])){
-                            throw new RouteException('The args argument must be an array.');
+                            throw new RouteException('The "args" argument must be an array.');
                         }
                         
                         $args = array_merge($args, $options['args']);
@@ -289,7 +283,7 @@ namespace Tres\router {
                         $controller = $namespace.'\\'.$controller;
                         
                         if(!class_exists($controller)){
-                            throw new RouteException('Controller '.$controller.' is not found.');
+                            throw new RouteException('Controller "'.$controller.'" is not found.');
                         }
                         
                         if(!isset($method)){
@@ -298,7 +292,7 @@ namespace Tres\router {
                         } else {
                             if(!method_exists($controller, $method)){
                                 throw new RouteException(
-                                    'Method '.$method.' does not exist in the '.$controller.' controller.'
+                                    'Method "'.$method.'" does not exist in the '.$controller.' controller.'
                                 );
                             }
                             
@@ -339,14 +333,15 @@ namespace Tres\router {
         }
         
         /**
-         * Groups routes together.
+         * Used to group routes together. Checks there are no problems with 
+         * the provided input.
          */
         public static function group(){
             $args = func_get_args();
             
             if(count($args) === 1){
                 if(!is_callable($args[0])){
-                    throw new RouteException('The first and only argument must be callable.');
+                    throw new RouteException('The first (and only) argument must be callable.');
                 }
             } else if(count($args) === 2){
                 list($options, $callable) = $args;
@@ -356,12 +351,12 @@ namespace Tres\router {
                 }
                 
                 if(!is_string($options) && !is_array($options)){
-                    throw new RouteException('The first argument type is not valid.');
+                    throw new RouteException('The first argument\'s type is invalid.');
                 }
                 
                 call_user_func($callable);
             } else {
-                throw new RouteException('The supplied amount of arguments is not valid.');
+                throw new RouteException('The supplied amount of arguments is invalid.');
             }
         }
         

@@ -1,7 +1,5 @@
 <?php
 
-use Tres\router\RouteException;
-use Tres\router\ConfigException;
 use Tres\router\Config;
 
 ini_set('display_errors', 1);
@@ -33,18 +31,9 @@ class_alias('Tres\router\Redirect', 'Redirect');
 class_alias('Tres\router\Route', 'Route');
 class_alias('Tres\router\URL', 'URL');
 
-try {
-    Route::setConfig([
-        'root' => __DIR__,
-        'default_controller_namespace' => 'controllers'
-    ]);
-} catch(ConfigException $e){
-    echo $e->getMessage();
-}
+Route::setConfig([
+    'root' => __DIR__,
+    'default_controller_namespace' => 'controllers'
+]);
 
-try {
-    require_once('routes.php');
-} catch(RouteException $e){
-    echo $e->getMessage();
-}
-
+require_once('routes.php');
