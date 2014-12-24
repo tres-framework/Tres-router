@@ -16,7 +16,7 @@ namespace Tres\router {
          * 
          * @var string
          */
-        protected static $_config = [];
+        public static $config = [];
         
         /**
          * The route paths.
@@ -60,15 +60,6 @@ namespace Tres\router {
          * The name/suffix used to identify a Not Found route.
          */
         const NOT_FOUND = '_404';
-        
-        /**
-         * Sets the config.
-         * 
-         * @param array $config
-         */
-        public static function setConfig(array $config){
-            self::$_config = $config;
-        }
         
         /**
          * Registers a route with a GET request.
@@ -168,20 +159,6 @@ namespace Tres\router {
         }
         
         /**
-         * Gets the current URI.
-         * 
-         * @return string
-         */
-        protected static function _getURI(){
-            $root = str_replace('\\', '/', self::$_config['root']);
-            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $uri = $_SERVER['DOCUMENT_ROOT'].$uri;
-            $uri = str_replace($root, '', $uri);
-            
-            return $uri;
-        }
-        
-        /**
          * Processes the routes.
          * 
          * @return bool True on success.
@@ -239,84 +216,6 @@ namespace Tres\router {
             }
             
             return $routeMatched;
-        }
-        
-        /**
-         * Finds the correct HTTP request and runs the route.
-         * 
-         * @param  int   $routeKey The key of the route.
-         * @param  array $args     (Optional) The arguments to pass to the route.
-         * 
-         * @return bool
-         */
-        protected static function _run($routeKey, $args = []){
-            if(self::$_requests[$routeKey] === self::$_request){
-                $options = self::$_options[$routeKey];
-                
-                if(is_callable($options)){
-                    call_user_func_array($options, $args);
-                    return true;
-                } else if(is_array($options)){
-                    if(isset($options['args'])){
-                        if(!is_array($options['args'])){
-                            throw new RouteException('The "args" argument must be an array.');
-                        }
-                        
-                        $args = array_merge($args, $options['args']);
-                    }
-                    
-                    if(isset($options['uses'])){
-                        if(empty($options['uses'])){
-                            throw new RouteException('The "uses" argument cannot be empty.');
-                        }
-                        
-                        $options['uses'] = explode('@', $options['uses'], 2);
-                        $method = (isset($options['uses'][1])) ? $options['uses'][1] : null;
-                        
-                        if(isset($options['namespace'])){
-                            $namespace = $options['namespace'];
-                        } else {
-                            $namespace = self::$_config['default_controller_namespace'];
-                        }
-                        
-                        $controller = $options['uses'][0];
-                        $controller = $namespace.'\\'.$controller;
-                        
-                        if(!class_exists($controller)){
-                            throw new RouteException('Controller "'.$controller.'" is not found.');
-                        }
-                        
-                        if(!isset($method)){
-                            $class = new ReflectionClass($controller);
-                            $class->newInstanceArgs($args);
-                        } else {
-                            if(!method_exists($controller, $method)){
-                                throw new RouteException(
-                                    'Method "'.$method.'" does not exist in the '.$controller.' controller.'
-                                );
-                            }
-                            
-                            call_user_func_array([
-                                new $controller,
-                                $method
-                            ], $args);
-                        }
-                        
-                        return true;
-                    } else { // No controller/method found. Search for callables.
-                        foreach($options as $option){
-                            if(is_callable($option)){
-                                call_user_func_array($option, $args);
-                                return true;
-                            }
-                        }
-                    }
-                    
-                    throw new RouteException('Neither a "uses" method nor a callable provided.');
-                } else {
-                    throw new RouteException('Second argument is neither an array nor a callable.');
-                }
-            }
         }
         
         /**
@@ -380,6 +279,20 @@ namespace Tres\router {
         }
         
         /**
+         * Gets the current URI.
+         * 
+         * @return string
+         */
+        protected static function _getURI(){
+            $root = str_replace('\\', '/', self::$config['root']);
+            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $uri = $_SERVER['DOCUMENT_ROOT'].$uri;
+            $uri = str_replace($root, '', $uri);
+            
+            return $uri;
+        }
+        
+        /**
          * Checks the URI and gets the arguments.
          * 
          * @param  array      $splitRoute The route array to check from.
@@ -419,6 +332,84 @@ namespace Tres\router {
             }
             
             return false;
+        }
+        
+        /**
+         * Finds the correct HTTP request and runs the route.
+         * 
+         * @param  int   $routeKey The key of the route.
+         * @param  array $args     (Optional) The arguments to pass to the route.
+         * 
+         * @return bool
+         */
+        protected static function _run($routeKey, $args = []){
+            if(self::$_requests[$routeKey] === self::$_request){
+                $options = self::$_options[$routeKey];
+                
+                if(is_callable($options)){
+                    call_user_func_array($options, $args);
+                    return true;
+                } else if(is_array($options)){
+                    if(isset($options['args'])){
+                        if(!is_array($options['args'])){
+                            throw new RouteException('The "args" argument must be an array.');
+                        }
+                        
+                        $args = array_merge($args, $options['args']);
+                    }
+                    
+                    if(isset($options['uses'])){
+                        if(empty($options['uses'])){
+                            throw new RouteException('The "uses" argument cannot be empty.');
+                        }
+                        
+                        $options['uses'] = explode('@', $options['uses'], 2);
+                        $method = (isset($options['uses'][1])) ? $options['uses'][1] : null;
+                        
+                        if(isset($options['namespace'])){
+                            $namespace = $options['namespace'];
+                        } else {
+                            $namespace = self::$config['default_controller_namespace'];
+                        }
+                        
+                        $controller = $options['uses'][0];
+                        $controller = $namespace.'\\'.$controller;
+                        
+                        if(!class_exists($controller)){
+                            throw new RouteException('Controller "'.$controller.'" is not found.');
+                        }
+                        
+                        if(!isset($method)){
+                            $class = new ReflectionClass($controller);
+                            $class->newInstanceArgs($args);
+                        } else {
+                            if(!method_exists($controller, $method)){
+                                throw new RouteException(
+                                    'Method "'.$method.'" does not exist in the '.$controller.' controller.'
+                                );
+                            }
+                            
+                            call_user_func_array([
+                                new $controller,
+                                $method
+                            ], $args);
+                        }
+                        
+                        return true;
+                    } else { // No controller/method found. Search for callables.
+                        foreach($options as $option){
+                            if(is_callable($option)){
+                                call_user_func_array($option, $args);
+                                return true;
+                            }
+                        }
+                    }
+                    
+                    throw new RouteException('Neither a "uses" method nor a callable provided.');
+                } else {
+                    throw new RouteException('Second argument is neither an array nor a callable.');
+                }
+            }
         }
         
     }

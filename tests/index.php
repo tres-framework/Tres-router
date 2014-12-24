@@ -31,9 +31,9 @@ class_alias('Tres\router\Redirect', 'Redirect');
 class_alias('Tres\router\Route', 'Route');
 class_alias('Tres\router\URL', 'URL');
 
-Route::setConfig([
+Route::$config = [
     'root' => __DIR__,
     'default_controller_namespace' => 'controllers'
-]);
+];
 
 require_once('routes.php');
