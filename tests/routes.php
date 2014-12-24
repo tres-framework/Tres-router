@@ -13,7 +13,9 @@ Route::get('/about', [
     'alias' => 'about',
     function(){
         echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
-        echo '<pre>', print_r(Tres\router\PackageInfo::get()), '</pre>';
+        $json = file_get_contents('../src/Tres/router/package.json');
+        $json = json_decode($json);
+        echo '<pre>', print_r($json), '</pre>';
     },
     function(){
         echo 'Won\'t run.';
