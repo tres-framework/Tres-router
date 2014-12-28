@@ -286,9 +286,8 @@ namespace Tres\router {
         protected static function _getURI(){
             $root = str_replace('\\', '/', self::$config['root']);
             $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $uri = $_SERVER['DOCUMENT_ROOT'].$uri;
+            $uri = rtrim($_SERVER['DOCUMENT_ROOT'], '/').$uri;
             $uri = str_replace($root, '', $uri);
-            
             return $uri;
         }
         
