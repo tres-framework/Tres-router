@@ -25,5 +25,10 @@
         "role": "creator, maintainer",
         "email": "ped@tresframework.com",
         "github": "https://github.com/pedzed/"
+    },{
+        "name": "Julian Richen",
+        "nickname": "FireDart",
+        "email": "julian@tresframework.com",
+        "github": "https://github.com/firedart/"
     }]
 }
