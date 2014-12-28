@@ -1,39 +1,39 @@
 <?php
 
-use Tres\router\RouteException;
-use Tres\router\ConfigException;
 use Tres\router\Config;
 
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+set_exception_handler(function($e){
+    echo '<br /><b>Exception:</b> '.$e->getMessage();
+});
+
 define('PUBLIC_URL', 'http://tres-router.dev');
 
-spl_autoload_register(function($class){
-    $file = dirname(__DIR__).'/'.str_replace('\\', '/', $class.'.php');
-    
-    require_once($file);
+$dirs = [
+    dirname(__DIR__).'/src/',
+    dirname(__DIR__).'/tests/'
+];
+
+spl_autoload_register(function($class) use ($dirs){
+    foreach($dirs as $dir){
+        $file = $dir.str_replace('\\', '/', $class.'.php');
+        
+        if(is_readable($file)){
+            require_once($file);
+            break;
+        }
+    }
 });
 
 class_alias('Tres\router\Redirect', 'Redirect');
 class_alias('Tres\router\Route', 'Route');
 class_alias('Tres\router\URL', 'URL');
 
-try {
-    Route::setConfig([
-        'root' => __DIR__,
-        'controllers' => [
-            'namespace' => 'tests\\controllers',
-            'dir' => __DIR__.'/controllers'
-        ]
-    ]);
-} catch(ConfigException $e){
-    echo $e->getMessage();
-}
+Route::$config = [
+    'root' => __DIR__,
+    'default_controller_namespace' => 'controllers'
+];
 
-try {
-    require_once('routes.php');
-} catch(RouteException $e){
-    echo $e->getMessage();
-}
-
+require_once('routes.php');

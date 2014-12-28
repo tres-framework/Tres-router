@@ -1,0 +1,34 @@
+{
+    "name": "Tres router",
+    "version": "0.8",
+    "website": "http://tresframework.com",
+    "documentation": "https://github.com/tres-framework/docs/tree/master/routing",
+    "description_short": "Handles URL routes.",
+    
+    "description_long": [
+        "This is the router package used for Tres Framework. This is a ",
+        "stand-alone package, which means that it can also be used without ",
+        "the framework.\n\n",
+        
+        "A router generally forwards you to something. The router takes the ",
+        "URI, matches it with a list and takes action based on that.\n\n",
+        
+        "This technique adds a degree of separation between the files used ",
+        "to generate a webpage and the URL that is presented to the world. ",
+        "An addition to that is not only that it is search engine friendly, ",
+        "but also that it's prettier."
+    ],
+    
+    "contributors": [{
+        "name": "Ped Zed",
+        "nickname": "pedzed",
+        "role": "creator, maintainer",
+        "email": "ped@tresframework.com",
+        "github": "https://github.com/pedzed/"
+    },{
+        "name": "Julian Richen",
+        "nickname": "FireDart",
+        "email": "julian@tresframework.com",
+        "github": "https://github.com/firedart/"
+    }]
+}

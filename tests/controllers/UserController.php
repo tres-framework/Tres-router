@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\controllers {
+namespace controllers {
     
     class UserController extends BaseController {
         
@@ -29,7 +29,12 @@ namespace tests\controllers {
         }
         
         public function getProfile($id){
-            echo '<pre>', print_r($this->_users[$id]), '</pre>';
+            if(isset($this->_users[$id])){
+                echo '<pre>', print_r($this->_users[$id]), '</pre>';
+            } else {
+                // Error 404
+                echo 'User not found.';
+            }
         }
         
     }

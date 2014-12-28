@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\controllers {
+namespace controllers {
     
     abstract class BaseController {
         

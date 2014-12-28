@@ -1,13 +1,11 @@
 <?php
 
-Route::import('routes-2.php');
+Route::import('grouping-routes.php');
 
 Route::get('/', [
-    'controller' => 'HomeController',
-    'method' => 'exampleMethod',
     'alias' => 'home',
     function(){
-        echo 'HOME!';
+        echo '<pre>', print_r(Route::getList()), '</pre>';
     }
 ]);
 
@@ -15,20 +13,20 @@ Route::get('/about', [
     'alias' => 'about',
     function(){
         echo '<h1 style="font-family:Calibri, sans-serif;">About Tres router</h1>';
-        echo '<pre>', print_r(Tres\router\PackageInfo::get()), '</pre>';
+        $json = file_get_contents('../src/Tres/router/package.json');
+        $json = json_decode($json);
+        echo '<pre>', print_r($json), '</pre>';
     },
     function(){
         echo 'Won\'t run.';
     }
 ]);
 
-/*Route::get('/users/:id/', function($id){
-    echo 'ID: '.$id;
-});*/
-
 Route::get('/users/:username/', [
-    'controller' => 'UserController',
-    'method' => 'getProfile'
+    'uses' => 'UserController@getProfile',
+    'args' => [
+        'test'
+    ]
 ]);
 
 Route::get('/posts/:id/:title', function($id, $title){
@@ -44,8 +42,7 @@ Route::get('/posts/:id/:title', function($id, $title){
 });
 
 Route::get('/paramtest', [
-    'controller' => 'HomeController',
-    'method' => 'exampleMethod2',
+    'uses' => 'HomeController@exampleMethod2',
     'args' => [
         'first' => 1,
         'second' => '2',
@@ -53,6 +50,26 @@ Route::get('/paramtest', [
     ],
     'alias' => 'param'
 ]);
+
+Route::get('/namespacetest/:msg', [
+    'uses' => 'ExampleController@showMessage',
+    'namespace' => ''
+]);
+
+Route::get('/subcontroller', [
+    'uses' => 'SubController@testMethod',
+    'namespace' => 'controllers\subcontroller_tests'
+]);
+
+Route::group([
+    'namespace' => 'controllers\subcontroller_tests'
+], function(){
+    
+    Route::get('/subcontroller2', [
+        'uses' => 'SubController@testMethod',
+    ]);
+    
+});
 
 Route::register(['GET', 'POST'], 'multi-request', function(){
     echo (isset($_POST) && !empty($_POST)) ? 'POST' : 'GET', '<br />';
@@ -89,8 +106,7 @@ Route::get('/url/tests/paramtest', function(){
 });
 
 Route::notFound([
-    'controller' => 'ErrorController',
-    'method' => 'notFound',
+    'uses' => 'ErrorController@notFound'
 ]);
 
 Route::dispatch();
